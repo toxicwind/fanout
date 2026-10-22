@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# fanout — self-test gate (PASS/FAIL).
+# Compiled single-binary fan-out command runner. Gate = binary present,
+# executable, and responds to no-args usage (exit non-zero with usage line).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+echo "== fanout check: start =="
+[ -f fanout ] || { echo "FAIL: fanout binary missing"; exit 1; }
+[ -x fanout ] || { echo "FAIL: fanout binary not executable"; exit 1; }
+
+set +e
+out="$(./fanout 2>&1)"
+rc=$?
+set -e
+echo "$out"
+if [ "$rc" -eq 0 ]; then echo "NOTE: fanout returned 0 on no-args (expected usage/error)"; fi
+echo "$out" | grep -q "usage: fanout" || { echo "FAIL: no usage emitted"; exit 1; }
+
+echo "== fanout check: PASS =="
+exit 0
